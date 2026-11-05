@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="zh-TW" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MouseLab Pro - Apex Mouse & Aim Trainer</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Chart.js for Advanced Analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;700&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        cyber: {
+                            black: '#05070a',
+                            dark: '#0a0e17',
+                            card: 'rgba(15, 23, 42, 0.75)',
+                            border: 'rgba(56, 189, 248, 0.2)',
+                            cyan: '#00f0ff',
+                            magenta: '#ff0055',
+                            neonGreen: '#00ff66',
+                            gold: '#ffd700',
+                            purple: '#a855f7'
+                        }
+                    },
+                    fontFamily: {
+                        orbitron: ['Orbitron', 'sans-serif'],
+                        rajdhani: ['Rajdhani', 'sans-serif'],
+                        sans: ['Noto Sans TC', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #05070a;
+            color: #f1f5f9;
+            font-family: 'Rajdhani', 'Noto Sans TC', sans-serif;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        .font-digits { font-family: 'Orbitron', sans-serif; }
+
+        /* Glassmorphism styling */
+        .glass-panel {
+            background: rgba(10, 15, 26, 0.65);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 240, 255, 0.15);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5);
+        }
+
+        .glass-panel-active {
+            border-color: rgba(0, 240, 255, 0.6);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.25);
+        }
+
+        /* Neon Text & Glow effects */
+        .glow-cyan { text-shadow: 0 0 10px rgba(0, 240, 255, 0.7), 0 0 20px rgba(0, 240, 255, 0.4); }
+        .glow-magenta { text-shadow: 0 0 10px rgba(255, 0, 85, 0.7), 0 0 20px rgba(255, 0, 85, 0.4); }
+        .glow-green { text-shadow: 0 0 10px rgba(0, 255, 102, 0.7); }
+
+        /* Custom Drag Drop Challenge Styling */
+        .drag-card {
+            cursor: grab;
+            transition: transform 0.1s ease, box-shadow 0.1s ease;
+        }
+        .drag-card:active { cursor: grabbing; }
+
+        .drop-target-active {
+            border-color: #00f0ff !important;
+            background: rgba(0, 240, 255, 0.15) !important;
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.5);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: #05070a; }
+        ::-webkit-scrollbar-thumb { background: #00f0ff; rounded: 2px; }
+    </style>
+</head>
+<body class="h-screen w-screen flex flex-col justify-between p-3 md:p-5 relative select-none">
+
+    <!-- Background Grid Pattern -->
+    <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f293d15_1px,transparent_1px),linear-gradient(to_bottom,#1f293d15_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"></div>
+
+    <!-- Top Navigation Header -->
+    <header class="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 glass-panel rounded-2xl p-3 px-6">
+        
+        <!-- Logo & Title -->
+        <div class="flex items-center space-x-3">
+            <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-black font-extrabold text-xl shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+                <i class="fa-solid fa-crosshairs"></i>
+            </div>
+            <div>
+                <h1 class="text-xl md:text-2xl font-black font-orbitron tracking-widest text-white flex items-center gap-2">
+                    MOUSELAB <span class="text-cyan-400 glow-cyan">PRO</span>
+                </h1>
+                <p class="text-[10px] tracking-widest text-gray-400 font-semibold uppercase">Apex Precision & Aim Trainer</p>
+            </div>
+        </div>
+
+        <!-- Mode Selectors -->
+        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
+            <button id="btn-mode-click" onclick="switchMode('click')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
+                <i class="fa-solid fa-bullseye text-sm"></i> PRECISION
+            </button>
+            <button id="btn-mode-track" onclick="switchMode('track')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent">
+                <i class="fa-solid fa-wave-square text-sm"></i> TRACKING
+            </button>
+            <button id="btn-mode-drag" onclick="switchMode('drag')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent">
+                <i class="fa-solid fa-up-down-left-right text-sm"></i> DRAG SNAP
+            </button>
+        </div>
+
+        <!-- System Controls -->
+        <div class="flex items-center gap-4">
+            <!-- Audio Toggle -->
+            <button id="btn-audio" onclick="toggleAudio()" class="w-9 h-9 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-cyan-400 hover:border-cyan-400 transition-all">
+                <i class="fa-solid fa-volume-high"></i>
+            </button>
+
+            <!-- Crosshair Selector -->
+            <div class="flex items-center gap-1.5 bg-black/40 px-3 py-1.5 rounded-lg border border-white/10 text-xs">
+                <span class="text-gray-400">準心:</span>
+                <select id="select-crosshair" onchange="changeCrosshair()" class="bg-transparent text-cyan-400 font-bold focus:outline-none cursor-pointer">
+                    <option value="dot" class="bg-gray-900 text-white">圓點 (Dot)</option>
+                    <option value="cross" class="bg-gray-900 text-white" selected>十字 (Cross)</option>
+                    <option value="circle" class="bg-gray-900 text-white">雙環 (Circle)</option>
+                </select>
+            </div>
+
+            <!-- Settings Trigger -->
+            <button onclick="toggleSettingsModal()" class="w-9 h-9 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-300 hover:text-white hover:border-cyan-400 transition-all">
+                <i class="fa-solid fa-gear"></i>
+            </button>
+        </div>
+    </header>
+
+    <!-- Main Workspace Container -->
+    <main class="relative z-10 w-full max-w-7xl mx-auto flex-grow my-3 flex flex-col gap-3">
+        
+        <!-- Live Realtime Telemetry HUD -->
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-cyan-400">
+                <div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">REMAINING TIME</div>
+                    <div id="hud-timer" class="text-2xl font-digits font-extrabold text-cyan-400 glow-cyan">30.0s</div>
+                </div>
+                <i class="fa-solid fa-stopwatch text-2xl text-cyan-500/20"></i>
+            </div>
+
+            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-emerald-400">
+                <div>
+                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">SCORE / HITS</div>
+                    <div id="hud-score" class="text-2xl font-digits font-extrabold text-emerald-400 glow-green">0</div>
+                </div>
+                <i class="fa-solid fa-trophy text-2xl text-emerald-500/20"></i>
+            </div>
+
+            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-amber-400">
+                <div>
+                    <div id="hud-label-acc" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ACCURACY</div>
+                    <div id="hud-acc" class="text-2xl font-digits font-extrabold text-amber-400">100%</div>
+                </div>
+                <i class="fa-solid fa-bullseye text-2xl text-amber-500/20"></i>
+            </div>
+
+            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-rose-500">
+                <div>
+                    <div id="hud-label-extra" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">AVG REACTION / TTK</div>
+                    <div id="hud-extra" class="text-2xl font-digits font-extrabold text-rose-500 glow-magenta">0 ms</div>
+                </div>
+                <i class="fa-solid fa-bolt text-2xl text-rose-500/20"></i>
+            </div>
+        </div>
+
+        <!-- Interactive Game Arena -->
+        <div class="relative flex-grow glass-panel rounded-2xl overflow-hidden shadow-2xl min-h-[460px] flex items-center justify-center border border-cyber-border">
+            
+            <!-- Start / Pause Overlay -->
+            <div id="overlay-start" class="absolute inset-0 z-30 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
+                <div class="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-4xl mb-4 shadow-[0_0_30px_rgba(0,240,255,0.3)] animate-pulse">
+                    <i id="overlay-icon" class="fa-solid fa-bullseye"></i>
+                </div>
+                <h2 id="overlay-title" class="text-3xl font-black font-orbitron text-white tracking-wider mb-2">PRECISION & REACTION</h2>
+                <p id="overlay-desc" class="text-gray-400 max-w-lg text-sm mb-6 leading-relaxed">
+                    精準度與極速點擊練習。擊中目標中央的爆頭紅心可獲得額外積分與音效反饋。避免失誤點擊以提升 KPS 與反應時間。
+                </p>
+                <button onclick="startSession()" class="px-10 py-3.5 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-black text-lg tracking-widest font-orbitron rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.5)] transform hover:scale-105 transition-all">
+                    START SESSION <i class="fa-solid fa-play ml-2"></i>
+                </button>
+            </div>
+
+            <!-- Canvas View (Modes 1 & 2) -->
+            <div id="canvas-wrapper" class="w-full h-full absolute inset-0 cursor-none">
+                <canvas id="main-canvas" class="w-full h-full block"></canvas>
+            </div>
+
+            <!-- Drag Challenge Container (Mode 3) -->
+            <div id="drag-stage" class="hidden absolute inset-0 w-full h-full p-8 flex flex-col justify-between bg-black/40">
+                <!-- Drop Zones Container Top -->
+                <div id="drop-zones-grid" class="grid grid-cols-3 gap-6 h-1/2">
+                    <!-- Dynamic Drop Targets -->
+                </div>
+
+                <!-- Drag Items Spawn Source Bottom -->
+                <div id="drag-items-container" class="h-2/5 glass-panel rounded-xl p-4 flex items-center justify-center gap-6 border border-white/10">
+                    <!-- Dynamic Drag Cards -->
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Settings Modal -->
+    <div id="modal-settings" class="hidden fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+        <div class="glass-panel border-cyan-400/40 rounded-2xl max-w-md w-full p-6 shadow-2xl relative">
+            <div class="flex items-center justify-between mb-4 border-b border-white/10 pb-3">
+                <h3 class="text-lg font-bold font-orbitron text-cyan-400 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders"></i> SESSION CONFIGURATION
+                </h3>
+                <button onclick="toggleSettingsModal()" class="text-gray-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+
+            <div class="space-y-4 text-sm">
+                <div>
+                    <label class="block text-gray-400 mb-1 font-semibold">目標大小 (Target Size)</label>
+                    <select id="cfg-size" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-cyan-400 font-bold focus:border-cyan-400">
+                        <option value="large">大型 (Large - 初學者)</option>
+                        <option value="medium" selected>標準 (Medium - 競技)</option>
+                        <option value="small">微型 (Small - 高階極限)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 mb-1 font-semibold">訓練時間 (Duration)</label>
+                    <select id="cfg-time" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-cyan-400 font-bold focus:border-cyan-400">
+                        <option value="15">15 秒 (極速衝刺)</option>
+                        <option value="30" selected>30 秒 (標準評測)</option>
+                        <option value="60">60 秒 (耐力考驗)</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label class="block text-gray-400 mb-1 font-semibold">移動速度 / 難度 (Speed/Physics)</label>
+                    <select id="cfg-speed" class="w-full bg-black/60 border border-white/10 rounded-lg p-2.5 text-cyan-400 font-bold focus:border-cyan-400">
+                        <option value="slow">平緩 (Smooth)</option>
+                        <option value="medium" selected>標準 (Dynamic)</option>
+                        <option value="fast">狂暴 (Hyper Speed)</option>
+                    </select>
+                </div>
+            </div>
+
+            <button onclick="applySettings()" class="w-full mt-6 py-3 bg-cyan-500 hover:bg-cyan-400 text-black font-bold font-orbitron rounded-xl shadow-lg transition-all">
+                APPLY & SAVE
+            </button>
+        </div>
+    </div>
+
+    <!-- Analytics & Result Modal Screen -->
+    <div id="modal-result" class="hidden fixed inset-0 z-50 bg-black/90 backdrop-blur-xl flex items-center justify-center p-4 overflow-y-auto">
+        <div class="glass-panel border-cyan-400/50 rounded-3xl max-w-3xl w-full p-6 md:p-8 shadow-2xl relative my-auto">
+            
+            <div class="text-center mb-6">
+                <span class="text-xs font-bold font-orbitron text-cyan-400 tracking-widest uppercase">Performance Analysis Report</span>
+                <h2 id="res-mode-title" class="text-2xl font-black text-white font-orbitron">PRECISION & REACTION</h2>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                <!-- Rank & Score Badge -->
+                <div class="glass-panel p-5 rounded-2xl flex flex-col items-center justify-center text-center border-cyan-400/30">
+                    <div class="text-xs text-gray-400 font-bold uppercase mb-1">DESIGNATED RANK</div>
+                    <div id="res-rank" class="text-4xl font-black font-orbitron text-cyan-400 glow-cyan my-2">GRANDMASTER</div>
+                    <div id="res-score-total" class="text-sm font-digits text-gray-300">TOTAL SCORE: 24,500</div>
+                </div>
+
+                <!-- Radar Diagnostic Chart -->
+                <div class="md:col-span-2 glass-panel p-3 rounded-2xl h-52 flex items-center justify-center">
+                    <canvas id="radar-chart"></canvas>
+                </div>
+            </div>
+
+            <!-- Detailed Stat Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+                <div class="bg-black/50 p-3 rounded-xl border border-white/5">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Accuracy (命中率)</span>
+                    <span id="res-stat-acc" class="text-xl font-digits font-bold text-amber-400">98.5%</span>
+                </div>
+                <div class="bg-black/50 p-3 rounded-xl border border-white/5">
+                    <span id="res-label-stat2" class="text-[10px] text-gray-400 uppercase font-bold block">Avg Reaction (反應)</span>
+                    <span id="res-stat-extra" class="text-xl font-digits font-bold text-rose-400">210 ms</span>
+                </div>
+                <div class="bg-black/50 p-3 rounded-xl border border-white/5">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Headshot / Critical</span>
+                    <span id="res-stat-critical" class="text-xl font-digits font-bold text-cyan-400">18 Hit</span>
+                </div>
+                <div class="bg-black/50 p-3 rounded-xl border border-white/5">
+                    <span class="text-[10px] text-gray-400 uppercase font-bold block">Misclicks (失誤)</span>
+                    <span id="res-stat-misses" class="text-xl font-digits font-bold text-red-500">2</span>
+                </div>
+            </div>
+
+            <!-- Diagnostic Coach Feedback -->
+            <div class="bg-cyan-500/10 border border-cyan-400/30 p-4 rounded-xl mb-6">
+                <div class="text-xs font-bold font-orbitron text-cyan-400 mb-1 flex items-center gap-1.5">
+                    <i class="fa-solid fa-microchip"></i> AI PERFORMANCE DIAGNOSTIC:
+                </div>
+                <p id="res-feedback" class="text-xs text-gray-300 leading-relaxed">
+                    您的點擊預判與手速已具備高階選手水準！建議調降 DPI 0.1-0.2 以提升極限微調點擊時的穩定度。
+                </p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex gap-4">
+                <button onclick="closeResultModal(); startSession();" class="flex-1 py-3.5 bg-gradient-to-r from-cyan-400 to-blue-600 text-black font-black font-orbitron tracking-wider rounded-xl shadow-[0_0_20px_rgba(0,240,255,0.4)] hover:scale-[1.02] transition-all">
+                    RETRY SESSION <i class="fa-solid fa-rotate-right ml-1"></i>
+                </button>
+                <button onclick="closeResultModal();" class="px-6 py-3.5 bg-black/60 border border-white/10 hover:border-white/30 text-gray-300 font-bold font-orbitron rounded-xl transition-all">
+                    CLOSE
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Application Engine Logic -->
+    <script>
+        // System State
+        const state = {
+            mode: 'click', // 'click', 'track', 'drag'
+            size: 'medium',
+            duration: 30,
+            speed: 'medium',
+            crosshair: 'cross',
+            audioEnabled: true,
+            
+            // Runtime tracking
+            isRunning: false,
+            timeLeft: 30,
+            timerId: null,
+            score: 0,
+            hits: 0,
+            criticals: 0,
+            misses: 0,
+            totalClicks: 0,
+            reactionTimes: [],
+            lastSpawnTime: 0,
+            
+            // Tracking mode stats
+            trackTotalFrames: 0,
+            trackHoverFrames: 0,
+
+            // Drag mode stats
+            dragSuccessCount: 0
+        };
+
+        // DOM elements cache
+        const canvas = document.getElementById('main-canvas');
+        const ctx = canvas.getContext('2d');
+        const canvasWrapper = document.getElementById('canvas-wrapper');
+        const dragStage = document.getElementById('drag-stage');
+        const startOverlay = document.getElementById('overlay-start');
+        const resultModal = document.getElementById('modal-result');
+
+        // Web Audio Synthesizer Engine
+        let audioCtx = null;
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playSynthesizedSound(type) {
+            if (!state.audioEnabled) return;
+            initAudio();
+            if (!audioCtx) return;
+
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            const now = audioCtx.currentTime;
+
+            if (type === 'hit') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, now);
+                osc.frequency.exponentialRampToValueAtTime(1200, now + 0.08);
+                gain.gain.setValueAtTime(0.3, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.08);
+                osc.start(now);
+                osc.stop(now + 0.08);
+            } else if (type === 'headshot') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(1200, now);
+                osc.frequency.exponentialRampToValueAtTime(2400, now + 0.12);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.12);
+                osc.start(now);
+                osc.stop(now + 0.12);
+            } else if (type === 'miss') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(180, now);
+                osc.frequency.linearRampToValueAtTime(80, now + 0.15);
+                gain.gain.setValueAtTime(0.2, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15);
+                osc.start(now);
+                osc.stop(now + 0.15);
+            }
+        }
+
+        function toggleAudio() {
+            state.audioEnabled = !state.audioEnabled;
+            const btn = document.getElementById('btn-audio');
+            btn.innerHTML = state.audioEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-red-400"></i>';
+        }
+
+        // Particle FX System
+        let particles = [];
+        function createBurst(x, y, color) {
+            for (let i = 0; i < 16; i++) {
+                const angle = Math.random() * Math.PI * 2;
+                const speed = 2 + Math.random() * 6;
+                particles.push({
+                    x, y,
+                    vx: Math.cos(angle) * speed,
+                    vy: Math.sin(angle) * speed,
+                    radius: 2 + Math.random() * 3,
+                    alpha: 1,
+                    color: color || '#00f0ff'
+                });
+            }
+        }
+
+        function updateAndRenderParticles() {
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.x += p.vx;
+                p.y += p.vy;
+                p.alpha -= 0.03;
+
+                if (p.alpha <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+
+                ctx.save();
+                ctx.globalAlpha = p.alpha;
+                ctx.fillStyle = p.color;
+                ctx.shadowColor = p.color;
+                ctx.shadowBlur = 8;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.restore();
+            }
+        }
+
+        // Entity Definitions
+        let mousePos = { x: -1000, y: -1000 };
+        let clickTarget = { x: 0, y: 0, radius: 30, outerRadius: 30, shrinking: true };
+        let trackOrb = { x: 0, y: 0, radius: 32, t: 0, speed: 0.005, isHovered: false };
+
+        // Resize Canvas
+        function resizeCanvas() {
+            canvas.width = canvasWrapper.clientWidth;
+            canvas.height = canvasWrapper.clientHeight;
+        }
+
+        window.addEventListener('load', () => {
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            setupCanvasEvents();
+            updateModeOverlayInfo();
+        });
+
+        // Mode Navigation
+        function switchMode(newMode) {
+            if (state.isRunning) stopSession();
+            state.mode = newMode;
+
+            ['click', 'track', 'drag'].forEach(m => {
+                const btn = document.getElementById(`btn-mode-${m}`);
+                if (m === newMode) {
+                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,240,255,0.2)]";
+                } else {
+                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent";
+                }
+            });
+
+            if (newMode === 'drag') {
+                canvasWrapper.classList.add('hidden');
+                dragStage.classList.remove('hidden');
+            } else {
+                canvasWrapper.classList.remove('hidden');
+                dragStage.classList.add('hidden');
+            }
+
+            updateModeOverlayInfo();
+            resetHUD();
+        }
+
+        function updateModeOverlayInfo() {
+            const icon = document.getElementById('overlay-icon');
+            const title = document.getElementById('overlay-title');
+            const desc = document.getElementById('overlay-desc');
+
+            if (state.mode === 'click') {
+                icon.className = 'fa-solid fa-bullseye';
+                title.textContent = '1. PRECISION & REACTION';
+                desc.textContent = '動態縮放標靶點擊測試。瞄準中心紅心區可發動 Headshot 爆頭獲得最高分。考驗手眼協調與手速！';
+                document.getElementById('hud-label-acc').textContent = 'ACCURACY';
+                document.getElementById('hud-label-extra').textContent = 'AVG REACTION / TTK';
+            } else if (state.mode === 'track') {
+                icon.className = 'fa-solid fa-wave-square';
+                title.textContent = '2. SMOOTH TRACKING';
+                desc.textContent = '平滑軌跡隨機加速移動。維持游標於高亮覆蓋圈內以累積連擊分流，練習極致穩定度與平滑控鼠手感。';
+                document.getElementById('hud-label-acc').textContent = 'TRACK COVERAGE';
+                document.getElementById('hud-label-extra').textContent = 'FOCUS STATE';
+            } else if (state.mode === 'drag') {
+                icon.className = 'fa-solid fa-up-down-left-right';
+                title.textContent = '3. DRAG & SNAP CHALLENGE';
+                desc.textContent = '組合多維度顏色與圖案匹配拖曳。靠近目標區域將觸發磁吸對齊，考驗精確快速抓取與定位能力。';
+                document.getElementById('hud-label-acc').textContent = 'MATCH ACCURACY';
+                document.getElementById('hud-label-extra').textContent = 'PLACEMENT PACE';
+            }
+        }
+
+        function resetHUD() {
+            document.getElementById('hud-timer').textContent = state.duration.toFixed(1) + 's';
+            document.getElementById('hud-score').textContent = '0';
+            document.getElementById('hud-acc').textContent = '100%';
+            document.getElementById('hud-extra').textContent = state.mode === 'track' ? 'STANDBY' : '0 ms';
+        }
+
+        function toggleSettingsModal() {
+            document.getElementById('modal-settings').classList.toggle('hidden');
+        }
+
+        function applySettings() {
+            state.size = document.getElementById('cfg-size').value;
+            state.duration = parseInt(document.getElementById('cfg-time').value);
+            state.speed = document.getElementById('cfg-speed').value;
+            state.timeLeft = state.duration;
+            toggleSettingsModal();
+            resetHUD();
+        }
+
+        function changeCrosshair() {
+            state.crosshair = document.getElementById('select-crosshair').value;
+        }
+
+        // Engine Control
+        function startSession() {
+            initAudio();
+            state.isRunning = true;
+            state.timeLeft = state.duration;
+            state.score = 0;
+            state.hits = 0;
+            state.criticals = 0;
+            state.misses = 0;
+            state.totalClicks = 0;
+            state.reactionTimes = [];
+            state.trackTotalFrames = 0;
+            state.trackHoverFrames = 0;
+            state.dragSuccessCount = 0;
+            particles = [];
+
+            startOverlay.classList.add('hidden');
+
+            const startTime = Date.now();
+            state.timerId = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                state.timeLeft = Math.max(0, state.duration - elapsed);
+                document.getElementById('hud-timer').textContent = state.timeLeft.toFixed(1) + 's';
+
+                if (state.timeLeft <= 0) {
+                    stopSession();
+                }
+            }, 50);
+
+            if (state.mode === 'click') {
+                spawnClickTarget();
+                requestAnimationFrame(renderLoop);
+            } else if (state.mode === 'track') {
+                initTrackOrb();
+                requestAnimationFrame(renderLoop);
+            } else if (state.mode === 'drag') {
+                initDragChallenge();
+            }
+        }
+
+        function stopSession() {
+            state.isRunning = false;
+            clearInterval(state.timerId);
+            showAnalyticsReport();
+        }
+
+        // Event Handling
+        function setupCanvasEvents() {
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                mousePos.x = e.clientX - rect.left;
+                mousePos.y = e.clientY - rect.top;
+            });
+
+            canvas.addEventListener('mousedown', (e) => {
+                if (!state.isRunning || state.mode !== 'click') return;
+                state.totalClicks++;
+                
+                const rect = canvas.getBoundingClientRect();
+                const clickX = e.clientX - rect.left;
+                const clickY = e.clientY - rect.top;
+
+                const dist = Math.hypot(clickX - clickTarget.x, clickY - clickTarget.y);
+
+                if (dist <= clickTarget.radius) {
+                    // Critical Headshot zone (Inner 30% of target)
+                    const isHeadshot = dist <= clickTarget.radius * 0.35;
+                    
+                    if (isHeadshot) {
+                        state.score += 500;
+                        state.criticals++;
+                        playSynthesizedSound('headshot');
+                        createBurst(clickTarget.x, clickTarget.y, '#ff0055');
+                    } else {
+                        state.score += 250;
+                        state.hits++;
+                        playSynthesizedSound('hit');
+                        createBurst(clickTarget.x, clickTarget.y, '#00f0ff');
+                    }
+
+                    const reaction = Date.now() - state.lastSpawnTime;
+                    state.reactionTimes.push(reaction);
+                    spawnClickTarget();
+                } else {
+                    state.misses++;
+                    state.score = Math.max(0, state.score - 100);
+                    playSynthesizedSound('miss');
+                }
+                updateHUD();
+            });
+        }
+
+        // --- Mode 1: Dynamic Precision Click ---
+        function spawnClickTarget() {
+            const sizeMap = { large: 38, medium: 26, small: 16 };
+            const r = sizeMap[state.size];
+            const padding = r + 30;
+            clickTarget.radius = r;
+            clickTarget.outerRadius = r;
+            clickTarget.x = padding + Math.random() * (canvas.width - padding * 2);
+            clickTarget.y = padding + Math.random() * (canvas.height - padding * 2);
+            clickTarget.shrinking = true;
+            state.lastSpawnTime = Date.now();
+        }
+
+        // --- Mode 2: Smooth Curve Bezier Tracking ---
+        function initTrackOrb() {
+            const sizeMap = { large: 42, medium: 30, small: 20 };
+            const speedMap = { slow: 0.003, medium: 0.006, fast: 0.01 };
+            trackOrb.radius = sizeMap[state.size];
+            trackOrb.speed = speedMap[state.speed];
+            trackOrb.t = 0;
+            generateNewTrackPath();
+        }
+
+        function generateNewTrackPath() {
+            const p = 50;
+            trackOrb.p0 = { x: trackOrb.x || canvas.width / 2, y: trackOrb.y || canvas.height / 2 };
+            trackOrb.p1 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
+            trackOrb.p2 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
+            trackOrb.p3 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
+            trackOrb.t = 0;
+        }
+
+        function updateTrackOrb() {
+            trackOrb.t += trackOrb.speed;
+            if (trackOrb.t >= 1) {
+                generateNewTrackPath();
+            }
+
+            // Cubic Bezier interpolation
+            const t = trackOrb.t;
+            const cx = 3 * (trackOrb.p1.x - trackOrb.p0.x);
+            const bx = 3 * (trackOrb.p2.x - trackOrb.p1.x) - cx;
+            const ax = trackOrb.p3.x - trackOrb.p0.x - cx - bx;
+
+            const cy = 3 * (trackOrb.p1.y - trackOrb.p0.y);
+            const by = 3 * (trackOrb.p2.y - trackOrb.p1.y) - cy;
+            const ay = trackOrb.p3.y - trackOrb.p0.y - cy - by;
+
+            trackOrb.x = ax * Math.pow(t, 3) + bx * Math.pow(t, 2) + cx * t + trackOrb.p0.x;
+            trackOrb.y = ay * Math.pow(t, 3) + by * Math.pow(t, 2) + cy * t + trackOrb.p0.y;
+
+            // Hover collision check
+            const dist = Math.hypot(mousePos.x - trackOrb.x, mousePos.y - trackOrb.y);
+            trackOrb.isHovered = (dist <= trackOrb.radius);
+
+            state.trackTotalFrames++;
+            if (trackOrb.isHovered) {
+                state.trackHoverFrames++;
+                state.score += 5;
+            }
+
+            updateHUD();
+        }
+
+        // --- Render Loop (Modes 1 & 2) ---
+        function renderLoop() {
+            if (!state.isRunning) return;
+
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Render Mode 1 Target
+            if (state.mode === 'click') {
+                // Outer Pulse Ring
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#00f0ff';
+                ctx.shadowColor = '#00f0ff';
+                ctx.shadowBlur = 15;
+                ctx.stroke();
+
+                // Inner Headshot Hotspot
+                ctx.beginPath();
+                ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius * 0.35, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(255, 0, 85, 0.8)';
+                ctx.shadowColor = '#ff0055';
+                ctx.shadowBlur = 10;
+                ctx.fill();
+                ctx.restore();
+            }
+
+            // Render Mode 2 Tracking Orb & Laser Stream
+            if (state.mode === 'track') {
+                updateTrackOrb();
+
+                // Draw Visual Tracking Stream Beam
+                if (trackOrb.isHovered) {
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.moveTo(mousePos.x, mousePos.y);
+                    ctx.lineTo(trackOrb.x, trackOrb.y);
+                    ctx.strokeStyle = '#00ff66';
+                    ctx.lineWidth = 2;
+                    ctx.shadowColor = '#00ff66';
+                    ctx.shadowBlur = 12;
+                    ctx.stroke();
+                    ctx.restore();
+                }
+
+                // Draw Track Orb
+                ctx.save();
+                ctx.beginPath();
+                ctx.arc(trackOrb.x, trackOrb.y, trackOrb.radius, 0, Math.PI * 2);
+                
+                if (trackOrb.isHovered) {
+                    ctx.fillStyle = 'rgba(0, 255, 102, 0.25)';
+                    ctx.strokeStyle = '#00ff66';
+                    ctx.shadowColor = '#00ff66';
+                } else {
+                    ctx.fillStyle = 'rgba(255, 0, 85, 0.15)';
+                    ctx.strokeStyle = '#ff0055';
+                    ctx.shadowColor = '#ff0055';
+                }
+
+                ctx.fill();
+                ctx.lineWidth = 3;
+                ctx.shadowBlur = 18;
+                ctx.stroke();
+                ctx.restore();
+            }
+
+            // Render Particle FX
+            updateAndRenderParticles();
+
+            // Render Custom Crosshair
+            drawCustomCrosshair();
+
+            requestAnimationFrame(renderLoop);
+        }
+
+        // Custom Crosshair Renderer
+        function drawCustomCrosshair() {
+            if (mousePos.x < 0 || mousePos.y < 0) return;
+            const { x, y } = mousePos;
+
+            ctx.save();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.fillStyle = '#00f0ff';
+            ctx.lineWidth = 1.5;
+            ctx.shadowColor = '#00f0ff';
+            ctx.shadowBlur = 6;
+
+            if (state.crosshair === 'dot') {
+                ctx.beginPath();
+                ctx.arc(x, y, 3, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (state.crosshair === 'cross') {
+                ctx.beginPath();
+                ctx.moveTo(x - 10, y); ctx.lineTo(x - 3, y);
+                ctx.moveTo(x + 3, y);  ctx.lineTo(x + 10, y);
+                ctx.moveTo(x, y - 10); ctx.lineTo(x, y - 3);
+                ctx.moveTo(x, y + 3);  ctx.lineTo(x, y + 10);
+                ctx.stroke();
+            } else if (state.crosshair === 'circle') {
+                ctx.beginPath();
+                ctx.arc(x, y, 8, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            ctx.restore();
+        }
+
+        // --- Mode 3: Drag & Magnetic Snap ---
+        function initDragChallenge() {
+            const dropZonesGrid = document.getElementById('drop-zones-grid');
+            const dragItemsContainer = document.getElementById('drag-items-container');
+
+            dropZonesGrid.innerHTML = '';
+            dragItemsContainer.innerHTML = '';
+
+            const themes = [
+                { type: 'cyan', title: 'CYAN CORE', border: 'border-cyan-400', bg: 'bg-cyan-500/10', icon: 'fa-cube' },
+                { type: 'magenta', title: 'MAGENTA NODE', border: 'border-pink-500', bg: 'bg-pink-500/10', icon: 'fa-diamond' },
+                { type: 'green', title: 'MATRIX GRID', border: 'border-emerald-400', bg: 'bg-emerald-500/10', icon: 'fa-bolt' }
+            ];
+
+            // Render 3 Drop Zones
+            themes.forEach(t => {
+                const zone = document.createElement('div');
+                zone.dataset.targetType = t.type;
+                zone.className = `drop-zone border-2 border-dashed ${t.border} ${t.bg} rounded-2xl flex flex-col items-center justify-center p-4 transition-all duration-150`;
+                zone.innerHTML = `
+                    <div class="w-14 h-14 rounded-xl border border-white/20 flex items-center justify-center text-2xl text-white mb-2">
+                        <i class="fa-solid ${t.icon}"></i>
+                    </div>
+                    <span class="text-xs font-bold font-orbitron tracking-widest text-gray-300">${t.title}</span>
+                `;
+                dropZonesGrid.appendChild(zone);
+            });
+
+            // Spawn Cards
+            const count = state.size === 'large' ? 6 : state.size === 'medium' ? 9 : 12;
+            for (let i = 0; i < count; i++) {
+                const t = themes[Math.floor(Math.random() * themes.length)];
+                const card = document.createElement('div');
+                card.draggable = true;
+                card.dataset.type = t.type;
+                card.className = `drag-card w-14 h-14 rounded-xl bg-black/80 border-2 ${t.border} flex items-center justify-center text-xl text-white shadow-lg transform hover:scale-110 transition-all`;
+                card.innerHTML = `<i class="fa-solid ${t.icon}"></i>`;
+                
+                card.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', t.type);
+                    card.classList.add('opacity-40');
+                });
+
+                card.addEventListener('dragend', () => {
+                    card.classList.remove('opacity-40');
+                });
+
+                dragItemsContainer.appendChild(card);
+            }
+
+            setupDropZoneEvents();
+        }
+
+        function setupDropZoneEvents() {
+            const zones = document.querySelectorAll('.drop-zone');
+            zones.forEach(zone => {
+                zone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    zone.classList.add('drop-target-active');
+                });
+
+                zone.addEventListener('dragleave', () => {
+                    zone.classList.remove('drop-target-active');
+                });
+
+                zone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    zone.classList.remove('drop-target-active');
+                    if (!state.isRunning) return;
+
+                    const itemType = e.dataTransfer.getData('text/plain');
+                    const targetType = zone.dataset.targetType;
+
+                    if (itemType === targetType) {
+                        state.score += 400;
+                        state.dragSuccessCount++;
+                        playSynthesizedSound('hit');
+
+                        // Find and remove one matched drag item element
+                        const matchedCard = document.querySelector(`.drag-card[data-type="${itemType}"]`);
+                        if (matchedCard) matchedCard.remove();
+                    } else {
+                        state.misses++;
+                        state.score = Math.max(0, state.score - 150);
+                        playSynthesizedSound('miss');
+                    }
+
+                    updateHUD();
+
+                    // Clear check
+                    if (document.querySelectorAll('.drag-card').length === 0) {
+                        initDragChallenge();
+                    }
+                });
+            });
+        }
+
+        // HUD Synchronizer
+        function updateHUD() {
+            document.getElementById('hud-score').textContent = state.score;
+
+            if (state.mode === 'click') {
+                const acc = state.totalClicks > 0 ? Math.round(((state.hits + state.criticals) / state.totalClicks) * 100) : 100;
+                document.getElementById('hud-acc').textContent = acc + '%';
+
+                const avgTime = state.reactionTimes.length > 0 
+                    ? Math.round(state.reactionTimes.reduce((a, b) => a + b, 0) / state.reactionTimes.length) 
+                    : 0;
+                document.getElementById('hud-extra').textContent = avgTime + ' ms';
+            } else if (state.mode === 'track') {
+                const cov = state.trackTotalFrames > 0 ? Math.round((state.trackHoverFrames / state.trackTotalFrames) * 100) : 0;
+                document.getElementById('hud-acc').textContent = cov + '%';
+                document.getElementById('hud-extra').textContent = trackOrb.isHovered ? 'LOCKED ON' : 'SEARCHING';
+            } else if (state.mode === 'drag') {
+                const attempts = state.dragSuccessCount + state.misses;
+                const acc = attempts > 0 ? Math.round((state.dragSuccessCount / attempts) * 100) : 100;
+                document.getElementById('hud-acc').textContent = acc + '%';
+
+                const elapsed = state.duration - state.timeLeft;
+                const speed = state.dragSuccessCount > 0 ? (elapsed / state.dragSuccessCount).toFixed(2) : '0';
+                document.getElementById('hud-extra').textContent = speed + ' s/item';
+            }
+        }
+
+        // Radar Chart Instance
+        let radarChartInstance = null;
+
+        function showAnalyticsReport() {
+            const titleEl = document.getElementById('res-mode-title');
+            const rankEl = document.getElementById('res-rank');
+            const scoreEl = document.getElementById('res-score-total');
+            const statAcc = document.getElementById('res-stat-acc');
+            const statExtra = document.getElementById('res-stat-extra');
+            const statCrit = document.getElementById('res-stat-critical');
+            const statMiss = document.getElementById('res-stat-misses');
+            const feedback = document.getElementById('res-feedback');
+
+            let accuracy = 0;
+            let rank = 'DIAMOND';
+            let radarData = [80, 75, 85, 70, 90];
+
+            if (state.mode === 'click') {
+                titleEl.textContent = 'PRECISION & REACTION REPORT';
+                accuracy = state.totalClicks > 0 ? Math.round(((state.hits + state.criticals) / state.totalClicks) * 100) : 0;
+                const avgReaction = state.reactionTimes.length > 0 
+                    ? Math.round(state.reactionTimes.reduce((a,b)=>a+b,0) / state.reactionTimes.length) : 0;
+                
+                statAcc.textContent = accuracy + '%';
+                statExtra.textContent = avgReaction + ' ms';
+                statCrit.textContent = state.criticals + ' Headshots';
+                statMiss.textContent = state.misses;
+
+                if (accuracy >= 95 && avgReaction < 240) { rank = 'GRANDMASTER'; }
+                else if (accuracy >= 88 && avgReaction < 320) { rank = 'EMERALD'; }
+                else if (accuracy >= 75) { rank = 'DIAMOND'; }
+                else { rank = 'GOLD'; }
+
+                radarData = [accuracy, Math.max(20, 100 - avgReaction / 5), (state.criticals / (state.hits || 1)) * 100, 85, 90];
+                feedback.textContent = `您的平均反應時間為 ${avgReaction}ms，打擊精準度達到 ${accuracy}%。建議在瞄準時適度放鬆手腕肌肉，能更精準執行 Headshot 微調。`;
+
+            } else if (state.mode === 'track') {
+                titleEl.textContent = 'SMOOTH TRACKING REPORT';
+                accuracy = state.trackTotalFrames > 0 ? Math.round((state.trackHoverFrames / state.trackTotalFrames) * 100) : 0;
+                
+                statAcc.textContent = accuracy + '%';
+                statExtra.textContent = (state.trackHoverFrames * 0.016).toFixed(1) + ' s';
+                statCrit.textContent = 'N/A';
+                statMiss.textContent = ((state.trackTotalFrames - state.trackHoverFrames) * 0.016).toFixed(1) + ' s';
+
+                if (accuracy >= 85) rank = 'GRANDMASTER';
+                else if (accuracy >= 70) rank = 'EMERALD';
+                else if (accuracy >= 55) rank = 'DIAMOND';
+                else rank = 'GOLD';
+
+                radarData = [accuracy, 70, 60, accuracy, 95];
+                feedback.textContent = `平滑追蹤覆蓋率為 ${accuracy}%。光滑度與追蹤軌跡穩定，保持滑鼠墊清潔與滑順的貼片狀況將有效減少微抖動。`;
+
+            } else if (state.mode === 'drag') {
+                titleEl.textContent = 'DRAG SNAP CHALLENGE REPORT';
+                const total = state.dragSuccessCount + state.misses;
+                accuracy = total > 0 ? Math.round((state.dragSuccessCount / total) * 100) : 0;
+
+                statAcc.textContent = accuracy + '%';
+                statExtra.textContent = state.dragSuccessCount + ' Placed';
+                statCrit.textContent = 'N/A';
+                statMiss.textContent = state.misses;
+
+                if (accuracy >= 92 && state.dragSuccessCount >= 18) rank = 'GRANDMASTER';
+                else if (accuracy >= 80) rank = 'EMERALD';
+                else rank = 'DIAMOND';
+
+                radarData = [accuracy, 85, 90, 75, 80];
+                feedback.textContent = `拖曳與磁吸鎖定表現良好！您在快速抓取與定點定位具備極佳的直覺手感。`;
+            }
+
+            rankEl.textContent = rank;
+            scoreEl.textContent = `TOTAL SCORE: ${state.score.toLocaleString()}`;
+
+            // Render Radar Chart
+            renderRadarChart(radarData);
+
+            resultModal.classList.remove('hidden');
+        }
+
+        function renderRadarChart(dataPoints) {
+            const chartCanvas = document.getElementById('radar-chart');
+            if (radarChartInstance) radarChartInstance.destroy();
+
+            radarChartInstance = new Chart(chartCanvas, {
+                type: 'radar',
+                data: {
+                    labels: ['Accuracy', 'Reaction', 'Precision', 'Tracking', 'Stability'],
+                    datasets: [{
+                        label: 'Metrics',
+                        data: dataPoints,
+                        backgroundColor: 'rgba(0, 240, 255, 0.2)',
+                        borderColor: '#00f0ff',
+                        pointBackgroundColor: '#ff0055',
+                        pointBorderColor: '#fff',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        r: {
+                            angleLines: { color: 'rgba(255, 255, 255, 0.1)' },
+                            grid: { color: 'rgba(255, 255, 255, 0.1)' },
+                            pointLabels: { color: '#94a3b8', font: { size: 10, family: 'Orbitron' } },
+                            ticks: { display: false },
+                            min: 0,
+                            max: 100
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        function closeResultModal() {
+            resultModal.classList.add('hidden');
+            startOverlay.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>
