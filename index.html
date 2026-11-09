@@ -48,6 +48,8 @@
             font-family: 'Rajdhani', 'Noto Sans TC', sans-serif;
             overflow: hidden;
             user-select: none;
+            -webkit-user-select: none;
+            touch-action: none;
         }
 
         .font-digits { font-family: 'Orbitron', sans-serif; }
@@ -71,9 +73,10 @@
         .glow-magenta { text-shadow: 0 0 10px rgba(255, 0, 85, 0.7), 0 0 20px rgba(255, 0, 85, 0.4); }
         .glow-green { text-shadow: 0 0 10px rgba(0, 255, 102, 0.7); }
 
-        /* Custom Drag Drop Challenge Styling */
+        /* Touch Drag Drop Challenge Styling */
         .drag-card {
             cursor: grab;
+            touch-action: none;
             transition: transform 0.1s ease, box-shadow 0.1s ease;
         }
         .drag-card:active { cursor: grabbing; }
@@ -90,42 +93,54 @@
         ::-webkit-scrollbar-thumb { background: #00f0ff; rounded: 2px; }
     </style>
 </head>
-<body class="h-screen w-screen flex flex-col justify-between p-3 md:p-5 relative select-none">
+<body class="h-screen w-screen flex flex-col justify-between p-2 md:p-5 relative select-none touch-none">
 
     <!-- Background Grid Pattern -->
     <div class="absolute inset-0 bg-[linear-gradient(to_right,#1f293d15_1px,transparent_1px),linear-gradient(to_bottom,#1f293d15_1px,transparent_1px)] bg-[size:4rem_4rem] pointer-events-none"></div>
 
     <!-- Top Navigation Header -->
-    <header class="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4 glass-panel rounded-2xl p-3 px-6">
+    <header class="relative z-10 w-full max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-2 md:gap-4 glass-panel rounded-2xl p-2.5 md:p-3 px-4 md:px-6">
         
         <!-- Logo & Title -->
-        <div class="flex items-center space-x-3">
-            <div class="relative flex items-center justify-center w-10 h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-black font-extrabold text-xl shadow-[0_0_15px_rgba(0,240,255,0.5)]">
-                <i class="fa-solid fa-crosshairs"></i>
+        <div class="flex items-center space-x-3 w-full md:w-auto justify-between md:justify-start">
+            <div class="flex items-center space-x-3">
+                <div class="relative flex items-center justify-center w-8 h-8 md:w-10 md:h-10 rounded-xl bg-gradient-to-br from-cyan-400 to-blue-600 text-black font-extrabold text-lg md:text-xl shadow-[0_0_15px_rgba(0,240,255,0.5)]">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg md:text-2xl font-black font-orbitron tracking-widest text-white flex items-center gap-2">
+                        MOUSELAB <span class="text-cyan-400 glow-cyan">PRO</span>
+                    </h1>
+                    <p class="text-[9px] md:text-[10px] tracking-widest text-gray-400 font-semibold uppercase">Aim & Touch Trainer</p>
+                </div>
             </div>
-            <div>
-                <h1 class="text-xl md:text-2xl font-black font-orbitron tracking-widest text-white flex items-center gap-2">
-                    MOUSELAB <span class="text-cyan-400 glow-cyan">PRO</span>
-                </h1>
-                <p class="text-[10px] tracking-widest text-gray-400 font-semibold uppercase">Apex Precision & Aim Trainer</p>
+
+            <!-- Mobile Settings Trigger & Audio -->
+            <div class="flex md:hidden items-center gap-2">
+                <button id="btn-audio-mobile" onclick="toggleAudio()" class="w-8 h-8 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-cyan-400">
+                    <i class="fa-solid fa-volume-high"></i>
+                </button>
+                <button onclick="toggleSettingsModal()" class="w-8 h-8 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-gray-300">
+                    <i class="fa-solid fa-gear"></i>
+                </button>
             </div>
         </div>
 
         <!-- Mode Selectors -->
-        <div class="flex items-center gap-2 bg-black/40 p-1.5 rounded-xl border border-white/5">
-            <button id="btn-mode-click" onclick="switchMode('click')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,240,255,0.2)]">
-                <i class="fa-solid fa-bullseye text-sm"></i> PRECISION
+        <div class="flex items-center gap-1.5 md:gap-2 bg-black/40 p-1 md:p-1.5 rounded-xl border border-white/5 overflow-x-auto w-full md:w-auto">
+            <button id="btn-mode-click" onclick="switchMode('click')" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 whitespace-nowrap">
+                <i class="fa-solid fa-bullseye text-xs md:text-sm"></i> PRECISION
             </button>
-            <button id="btn-mode-track" onclick="switchMode('track')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent">
-                <i class="fa-solid fa-wave-square text-sm"></i> TRACKING
+            <button id="btn-mode-track" onclick="switchMode('track')" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 text-gray-400 hover:text-white border border-transparent whitespace-nowrap">
+                <i class="fa-solid fa-wave-square text-xs md:text-sm"></i> TRACKING
             </button>
-            <button id="btn-mode-drag" onclick="switchMode('drag')" class="px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent">
-                <i class="fa-solid fa-up-down-left-right text-sm"></i> DRAG SNAP
+            <button id="btn-mode-drag" onclick="switchMode('drag')" class="px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 text-gray-400 hover:text-white border border-transparent whitespace-nowrap">
+                <i class="fa-solid fa-up-down-left-right text-xs md:text-sm"></i> DRAG SNAP
             </button>
         </div>
 
-        <!-- System Controls -->
-        <div class="flex items-center gap-4">
+        <!-- System Controls (Desktop View) -->
+        <div class="hidden md:flex items-center gap-4">
             <!-- Audio Toggle -->
             <button id="btn-audio" onclick="toggleAudio()" class="w-9 h-9 rounded-lg bg-black/40 border border-white/10 flex items-center justify-center text-cyan-400 hover:border-cyan-400 transition-all">
                 <i class="fa-solid fa-volume-high"></i>
@@ -149,74 +164,74 @@
     </header>
 
     <!-- Main Workspace Container -->
-    <main class="relative z-10 w-full max-w-7xl mx-auto flex-grow my-3 flex flex-col gap-3">
+    <main class="relative z-10 w-full max-w-7xl mx-auto flex-grow my-2 md:my-3 flex flex-col gap-2 md:gap-3">
         
         <!-- Live Realtime Telemetry HUD -->
-        <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-cyan-400">
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
+            <div class="glass-panel p-2.5 md:p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-cyan-400">
                 <div>
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">REMAINING TIME</div>
-                    <div id="hud-timer" class="text-2xl font-digits font-extrabold text-cyan-400 glow-cyan">30.0s</div>
+                    <div class="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-wider">TIME</div>
+                    <div id="hud-timer" class="text-xl md:text-2xl font-digits font-extrabold text-cyan-400 glow-cyan">30.0s</div>
                 </div>
-                <i class="fa-solid fa-stopwatch text-2xl text-cyan-500/20"></i>
+                <i class="fa-solid fa-stopwatch text-xl md:text-2xl text-cyan-500/20"></i>
             </div>
 
-            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-emerald-400">
+            <div class="glass-panel p-2.5 md:p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-emerald-400">
                 <div>
-                    <div class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">SCORE / HITS</div>
-                    <div id="hud-score" class="text-2xl font-digits font-extrabold text-emerald-400 glow-green">0</div>
+                    <div class="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-wider">SCORE</div>
+                    <div id="hud-score" class="text-xl md:text-2xl font-digits font-extrabold text-emerald-400 glow-green">0</div>
                 </div>
-                <i class="fa-solid fa-trophy text-2xl text-emerald-500/20"></i>
+                <i class="fa-solid fa-trophy text-xl md:text-2xl text-emerald-500/20"></i>
             </div>
 
-            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-amber-400">
+            <div class="glass-panel p-2.5 md:p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-amber-400">
                 <div>
-                    <div id="hud-label-acc" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">ACCURACY</div>
-                    <div id="hud-acc" class="text-2xl font-digits font-extrabold text-amber-400">100%</div>
+                    <div id="hud-label-acc" class="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-wider">ACCURACY</div>
+                    <div id="hud-acc" class="text-xl md:text-2xl font-digits font-extrabold text-amber-400">100%</div>
                 </div>
-                <i class="fa-solid fa-bullseye text-2xl text-amber-500/20"></i>
+                <i class="fa-solid fa-bullseye text-xl md:text-2xl text-amber-500/20"></i>
             </div>
 
-            <div class="glass-panel p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-rose-500">
+            <div class="glass-panel p-2.5 md:p-3.5 rounded-xl flex items-center justify-between border-l-4 border-l-rose-500">
                 <div>
-                    <div id="hud-label-extra" class="text-[10px] text-gray-400 font-bold uppercase tracking-wider">AVG REACTION / TTK</div>
-                    <div id="hud-extra" class="text-2xl font-digits font-extrabold text-rose-500 glow-magenta">0 ms</div>
+                    <div id="hud-label-extra" class="text-[9px] md:text-[10px] text-gray-400 font-bold uppercase tracking-wider">REACTION / PACE</div>
+                    <div id="hud-extra" class="text-xl md:text-2xl font-digits font-extrabold text-rose-500 glow-magenta">0 ms</div>
                 </div>
-                <i class="fa-solid fa-bolt text-2xl text-rose-500/20"></i>
+                <i class="fa-solid fa-bolt text-xl md:text-2xl text-rose-500/20"></i>
             </div>
         </div>
 
         <!-- Interactive Game Arena -->
-        <div class="relative flex-grow glass-panel rounded-2xl overflow-hidden shadow-2xl min-h-[460px] flex items-center justify-center border border-cyber-border">
+        <div class="relative flex-grow glass-panel rounded-2xl overflow-hidden shadow-2xl min-h-[360px] md:min-h-[460px] flex items-center justify-center border border-cyber-border">
             
             <!-- Start / Pause Overlay -->
-            <div id="overlay-start" class="absolute inset-0 z-30 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-6 text-center">
-                <div class="w-20 h-20 rounded-2xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-4xl mb-4 shadow-[0_0_30px_rgba(0,240,255,0.3)] animate-pulse">
+            <div id="overlay-start" class="absolute inset-0 z-30 bg-black/80 backdrop-blur-xl flex flex-col items-center justify-center p-4 md:p-6 text-center">
+                <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-cyan-500/10 border border-cyan-400/40 flex items-center justify-center text-cyan-400 text-3xl md:text-4xl mb-3 md:mb-4 shadow-[0_0_30px_rgba(0,240,255,0.3)] animate-pulse">
                     <i id="overlay-icon" class="fa-solid fa-bullseye"></i>
                 </div>
-                <h2 id="overlay-title" class="text-3xl font-black font-orbitron text-white tracking-wider mb-2">PRECISION & REACTION</h2>
-                <p id="overlay-desc" class="text-gray-400 max-w-lg text-sm mb-6 leading-relaxed">
-                    精準度與極速點擊練習。擊中目標中央的爆頭紅心可獲得額外積分與音效反饋。避免失誤點擊以提升 KPS 與反應時間。
+                <h2 id="overlay-title" class="text-2xl md:text-3xl font-black font-orbitron text-white tracking-wider mb-2">PRECISION & REACTION</h2>
+                <p id="overlay-desc" class="text-gray-400 max-w-lg text-xs md:text-sm mb-6 leading-relaxed px-2">
+                    精準度與極速點擊練習。支援手機觸控與滑鼠點擊。擊中標靶中央可發動 Headshot 爆頭。
                 </p>
-                <button onclick="startSession()" class="px-10 py-3.5 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-black text-lg tracking-widest font-orbitron rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.5)] transform hover:scale-105 transition-all">
+                <button onclick="startSession()" class="px-8 py-3 md:px-10 md:py-3.5 bg-gradient-to-r from-cyan-400 to-blue-600 hover:from-cyan-300 hover:to-blue-500 text-black font-black text-base md:text-lg tracking-widest font-orbitron rounded-xl shadow-[0_0_25px_rgba(0,240,255,0.5)] transform hover:scale-105 transition-all">
                     START SESSION <i class="fa-solid fa-play ml-2"></i>
                 </button>
             </div>
 
             <!-- Canvas View (Modes 1 & 2) -->
-            <div id="canvas-wrapper" class="w-full h-full absolute inset-0 cursor-none">
+            <div id="canvas-wrapper" class="w-full h-full absolute inset-0 md:cursor-none touch-none">
                 <canvas id="main-canvas" class="w-full h-full block"></canvas>
             </div>
 
-            <!-- Drag Challenge Container (Mode 3) -->
-            <div id="drag-stage" class="hidden absolute inset-0 w-full h-full p-8 flex flex-col justify-between bg-black/40">
+            <!-- Touch Drag Challenge Container (Mode 3) -->
+            <div id="drag-stage" class="hidden absolute inset-0 w-full h-full p-4 md:p-8 flex flex-col justify-between bg-black/40 touch-none">
                 <!-- Drop Zones Container Top -->
-                <div id="drop-zones-grid" class="grid grid-cols-3 gap-6 h-1/2">
+                <div id="drop-zones-grid" class="grid grid-cols-3 gap-3 md:gap-6 h-1/2">
                     <!-- Dynamic Drop Targets -->
                 </div>
 
                 <!-- Drag Items Spawn Source Bottom -->
-                <div id="drag-items-container" class="h-2/5 glass-panel rounded-xl p-4 flex items-center justify-center gap-6 border border-white/10">
+                <div id="drag-items-container" class="h-2/5 glass-panel rounded-xl p-2 md:p-4 flex items-center justify-center gap-3 md:gap-6 border border-white/10 overflow-x-auto">
                     <!-- Dynamic Drag Cards -->
                 </div>
             </div>
@@ -373,13 +388,22 @@
         const startOverlay = document.getElementById('overlay-start');
         const resultModal = document.getElementById('modal-result');
 
-        // Web Audio Synthesizer Engine
+        // Web Audio Synthesizer Engine (Unlocked on first touch)
         let audioCtx = null;
         function initAudio() {
             if (!audioCtx) {
                 audioCtx = new (window.AudioContext || window.webkitAudioContext)();
             }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
+
+        // Global Touch Unlocker for Mobile Audio
+        window.addEventListener('touchstart', function unlockAudioOnFirstTouch() {
+            initAudio();
+            window.removeEventListener('touchstart', unlockAudioOnFirstTouch);
+        }, { once: true });
 
         function playSynthesizedSound(type) {
             if (!state.audioEnabled) return;
@@ -423,7 +447,10 @@
         function toggleAudio() {
             state.audioEnabled = !state.audioEnabled;
             const btn = document.getElementById('btn-audio');
-            btn.innerHTML = state.audioEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-red-400"></i>';
+            const btnMob = document.getElementById('btn-audio-mobile');
+            const iconHTML = state.audioEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-red-400"></i>';
+            if (btn) btn.innerHTML = iconHTML;
+            if (btnMob) btnMob.innerHTML = iconHTML;
         }
 
         // Particle FX System
@@ -493,9 +520,9 @@
             ['click', 'track', 'drag'].forEach(m => {
                 const btn = document.getElementById(`btn-mode-${m}`);
                 if (m === newMode) {
-                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,240,255,0.2)]";
+                    btn.className = "px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 text-cyan-400 bg-cyan-500/10 border border-cyan-400/40 shadow-[0_0_10px_rgba(0,240,255,0.2)] whitespace-nowrap";
                 } else {
-                    btn.className = "px-4 py-2 rounded-lg text-xs font-bold tracking-wider transition-all flex items-center gap-2 text-gray-400 hover:text-white border border-transparent";
+                    btn.className = "px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-[11px] md:text-xs font-bold tracking-wider transition-all flex items-center gap-1.5 text-gray-400 hover:text-white border border-transparent whitespace-nowrap";
                 }
             });
 
@@ -525,7 +552,7 @@
             } else if (state.mode === 'track') {
                 icon.className = 'fa-solid fa-wave-square';
                 title.textContent = '2. SMOOTH TRACKING';
-                desc.textContent = '平滑軌跡隨機加速移動。維持游標於高亮覆蓋圈內以累積連擊分流，練習極致穩定度與平滑控鼠手感。';
+                desc.textContent = '平滑軌跡隨機加速移動。維持游標或手指於高亮覆蓋圈內以累積連擊分流，練習極致穩定度。';
                 document.getElementById('hud-label-acc').textContent = 'TRACK COVERAGE';
                 document.getElementById('hud-label-extra').textContent = 'FOCUS STATE';
             } else if (state.mode === 'drag') {
@@ -561,72 +588,28 @@
             state.crosshair = document.getElementById('select-crosshair').value;
         }
 
-        // Engine Control
-        function startSession() {
-            initAudio();
-            state.isRunning = true;
-            state.timeLeft = state.duration;
-            state.score = 0;
-            state.hits = 0;
-            state.criticals = 0;
-            state.misses = 0;
-            state.totalClicks = 0;
-            state.reactionTimes = [];
-            state.trackTotalFrames = 0;
-            state.trackHoverFrames = 0;
-            state.dragSuccessCount = 0;
-            particles = [];
-
-            startOverlay.classList.add('hidden');
-
-            const startTime = Date.now();
-            state.timerId = setInterval(() => {
-                const elapsed = (Date.now() - startTime) / 1000;
-                state.timeLeft = Math.max(0, state.duration - elapsed);
-                document.getElementById('hud-timer').textContent = state.timeLeft.toFixed(1) + 's';
-
-                if (state.timeLeft <= 0) {
-                    stopSession();
-                }
-            }, 50);
-
-            if (state.mode === 'click') {
-                spawnClickTarget();
-                requestAnimationFrame(renderLoop);
-            } else if (state.mode === 'track') {
-                initTrackOrb();
-                requestAnimationFrame(renderLoop);
-            } else if (state.mode === 'drag') {
-                initDragChallenge();
-            }
-        }
-
-        function stopSession() {
-            state.isRunning = false;
-            clearInterval(state.timerId);
-            showAnalyticsReport();
-        }
-
-        // Event Handling
+        // Event Handling for Mouse & Touch Dual Support
         function setupCanvasEvents() {
-            canvas.addEventListener('mousemove', (e) => {
+            function updatePointerPos(e) {
                 const rect = canvas.getBoundingClientRect();
-                mousePos.x = e.clientX - rect.left;
-                mousePos.y = e.clientY - rect.top;
-            });
+                if (e.touches && e.touches.length > 0) {
+                    mousePos.x = e.touches[0].clientX - rect.left;
+                    mousePos.y = e.touches[0].clientY - rect.top;
+                } else {
+                    mousePos.x = e.clientX - rect.left;
+                    mousePos.y = e.clientY - rect.top;
+                }
+            }
 
-            canvas.addEventListener('mousedown', (e) => {
+            function handlePointerHit(e) {
                 if (!state.isRunning || state.mode !== 'click') return;
-                state.totalClicks++;
-                
-                const rect = canvas.getBoundingClientRect();
-                const clickX = e.clientX - rect.left;
-                const clickY = e.clientY - rect.top;
+                e.preventDefault();
+                updatePointerPos(e);
 
-                const dist = Math.hypot(clickX - clickTarget.x, clickY - clickTarget.y);
+                state.totalClicks++;
+                const dist = Math.hypot(mousePos.x - clickTarget.x, mousePos.y - clickTarget.y);
 
                 if (dist <= clickTarget.radius) {
-                    // Critical Headshot zone (Inner 30% of target)
                     const isHeadshot = dist <= clickTarget.radius * 0.35;
                     
                     if (isHeadshot) {
@@ -650,188 +633,25 @@
                     playSynthesizedSound('miss');
                 }
                 updateHUD();
-            });
-        }
-
-        // --- Mode 1: Dynamic Precision Click ---
-        function spawnClickTarget() {
-            const sizeMap = { large: 38, medium: 26, small: 16 };
-            const r = sizeMap[state.size];
-            const padding = r + 30;
-            clickTarget.radius = r;
-            clickTarget.outerRadius = r;
-            clickTarget.x = padding + Math.random() * (canvas.width - padding * 2);
-            clickTarget.y = padding + Math.random() * (canvas.height - padding * 2);
-            clickTarget.shrinking = true;
-            state.lastSpawnTime = Date.now();
-        }
-
-        // --- Mode 2: Smooth Curve Bezier Tracking ---
-        function initTrackOrb() {
-            const sizeMap = { large: 42, medium: 30, small: 20 };
-            const speedMap = { slow: 0.003, medium: 0.006, fast: 0.01 };
-            trackOrb.radius = sizeMap[state.size];
-            trackOrb.speed = speedMap[state.speed];
-            trackOrb.t = 0;
-            generateNewTrackPath();
-        }
-
-        function generateNewTrackPath() {
-            const p = 50;
-            trackOrb.p0 = { x: trackOrb.x || canvas.width / 2, y: trackOrb.y || canvas.height / 2 };
-            trackOrb.p1 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
-            trackOrb.p2 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
-            trackOrb.p3 = { x: p + Math.random() * (canvas.width - p * 2), y: p + Math.random() * (canvas.height - p * 2) };
-            trackOrb.t = 0;
-        }
-
-        function updateTrackOrb() {
-            trackOrb.t += trackOrb.speed;
-            if (trackOrb.t >= 1) {
-                generateNewTrackPath();
             }
 
-            // Cubic Bezier interpolation
-            const t = trackOrb.t;
-            const cx = 3 * (trackOrb.p1.x - trackOrb.p0.x);
-            const bx = 3 * (trackOrb.p2.x - trackOrb.p1.x) - cx;
-            const ax = trackOrb.p3.x - trackOrb.p0.x - cx - bx;
+            // Mouse Listeners
+            canvas.addEventListener('mousemove', updatePointerPos);
+            canvas.addEventListener('mousedown', handlePointerHit);
 
-            const cy = 3 * (trackOrb.p1.y - trackOrb.p0.y);
-            const by = 3 * (trackOrb.p2.y - trackOrb.p1.y) - cy;
-            const ay = trackOrb.p3.y - trackOrb.p0.y - cy - by;
+            // Touch Listeners for Mobile
+            canvas.addEventListener('touchmove', (e) => {
+                e.preventDefault();
+                updatePointerPos(e);
+            }, { passive: false });
 
-            trackOrb.x = ax * Math.pow(t, 3) + bx * Math.pow(t, 2) + cx * t + trackOrb.p0.x;
-            trackOrb.y = ay * Math.pow(t, 3) + by * Math.pow(t, 2) + cy * t + trackOrb.p0.y;
-
-            // Hover collision check
-            const dist = Math.hypot(mousePos.x - trackOrb.x, mousePos.y - trackOrb.y);
-            trackOrb.isHovered = (dist <= trackOrb.radius);
-
-            state.trackTotalFrames++;
-            if (trackOrb.isHovered) {
-                state.trackHoverFrames++;
-                state.score += 5;
-            }
-
-            updateHUD();
+            canvas.addEventListener('touchstart', (e) => {
+                e.preventDefault();
+                handlePointerHit(e);
+            }, { passive: false });
         }
 
-        // --- Render Loop (Modes 1 & 2) ---
-        function renderLoop() {
-            if (!state.isRunning) return;
-
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-            // Render Mode 1 Target
-            if (state.mode === 'click') {
-                // Outer Pulse Ring
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(0, 240, 255, 0.15)';
-                ctx.fill();
-                ctx.lineWidth = 2;
-                ctx.strokeStyle = '#00f0ff';
-                ctx.shadowColor = '#00f0ff';
-                ctx.shadowBlur = 15;
-                ctx.stroke();
-
-                // Inner Headshot Hotspot
-                ctx.beginPath();
-                ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius * 0.35, 0, Math.PI * 2);
-                ctx.fillStyle = 'rgba(255, 0, 85, 0.8)';
-                ctx.shadowColor = '#ff0055';
-                ctx.shadowBlur = 10;
-                ctx.fill();
-                ctx.restore();
-            }
-
-            // Render Mode 2 Tracking Orb & Laser Stream
-            if (state.mode === 'track') {
-                updateTrackOrb();
-
-                // Draw Visual Tracking Stream Beam
-                if (trackOrb.isHovered) {
-                    ctx.save();
-                    ctx.beginPath();
-                    ctx.moveTo(mousePos.x, mousePos.y);
-                    ctx.lineTo(trackOrb.x, trackOrb.y);
-                    ctx.strokeStyle = '#00ff66';
-                    ctx.lineWidth = 2;
-                    ctx.shadowColor = '#00ff66';
-                    ctx.shadowBlur = 12;
-                    ctx.stroke();
-                    ctx.restore();
-                }
-
-                // Draw Track Orb
-                ctx.save();
-                ctx.beginPath();
-                ctx.arc(trackOrb.x, trackOrb.y, trackOrb.radius, 0, Math.PI * 2);
-                
-                if (trackOrb.isHovered) {
-                    ctx.fillStyle = 'rgba(0, 255, 102, 0.25)';
-                    ctx.strokeStyle = '#00ff66';
-                    ctx.shadowColor = '#00ff66';
-                } else {
-                    ctx.fillStyle = 'rgba(255, 0, 85, 0.15)';
-                    ctx.strokeStyle = '#ff0055';
-                    ctx.shadowColor = '#ff0055';
-                }
-
-                ctx.fill();
-                ctx.lineWidth = 3;
-                ctx.shadowBlur = 18;
-                ctx.stroke();
-                ctx.restore();
-            }
-
-            // Render Particle FX
-            updateAndRenderParticles();
-
-            // Render Custom Crosshair
-            drawCustomCrosshair();
-
-            requestAnimationFrame(renderLoop);
-        }
-
-        // Custom Crosshair Renderer
-        function drawCustomCrosshair() {
-            if (mousePos.x < 0 || mousePos.y < 0) return;
-            const { x, y } = mousePos;
-
-            ctx.save();
-            ctx.strokeStyle = '#00f0ff';
-            ctx.fillStyle = '#00f0ff';
-            ctx.lineWidth = 1.5;
-            ctx.shadowColor = '#00f0ff';
-            ctx.shadowBlur = 6;
-
-            if (state.crosshair === 'dot') {
-                ctx.beginPath();
-                ctx.arc(x, y, 3, 0, Math.PI * 2);
-                ctx.fill();
-            } else if (state.crosshair === 'cross') {
-                ctx.beginPath();
-                ctx.moveTo(x - 10, y); ctx.lineTo(x - 3, y);
-                ctx.moveTo(x + 3, y);  ctx.lineTo(x + 10, y);
-                ctx.moveTo(x, y - 10); ctx.lineTo(x, y - 3);
-                ctx.moveTo(x, y + 3);  ctx.lineTo(x, y + 10);
-                ctx.stroke();
-            } else if (state.crosshair === 'circle') {
-                ctx.beginPath();
-                ctx.arc(x, y, 8, 0, Math.PI * 2);
-                ctx.stroke();
-                ctx.beginPath();
-                ctx.arc(x, y, 1.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
-
-            ctx.restore();
-        }
-
-        // --- Mode 3: Drag & Magnetic Snap ---
+        // Dynamic Touch-based Drag and Drop handling
         function initDragChallenge() {
             const dropZonesGrid = document.getElementById('drop-zones-grid');
             const dragItemsContainer = document.getElementById('drag-items-container');
@@ -849,33 +669,87 @@
             themes.forEach(t => {
                 const zone = document.createElement('div');
                 zone.dataset.targetType = t.type;
-                zone.className = `drop-zone border-2 border-dashed ${t.border} ${t.bg} rounded-2xl flex flex-col items-center justify-center p-4 transition-all duration-150`;
+                zone.className = `drop-zone border-2 border-dashed ${t.border} ${t.bg} rounded-2xl flex flex-col items-center justify-center p-2 md:p-4 transition-all duration-150`;
                 zone.innerHTML = `
-                    <div class="w-14 h-14 rounded-xl border border-white/20 flex items-center justify-center text-2xl text-white mb-2">
+                    <div class="w-10 h-10 md:w-14 md:h-14 rounded-xl border border-white/20 flex items-center justify-center text-xl md:text-2xl text-white mb-1 md:mb-2">
                         <i class="fa-solid ${t.icon}"></i>
                     </div>
-                    <span class="text-xs font-bold font-orbitron tracking-widest text-gray-300">${t.title}</span>
+                    <span class="text-[10px] md:text-xs font-bold font-orbitron tracking-widest text-gray-300 text-center">${t.title}</span>
                 `;
                 dropZonesGrid.appendChild(zone);
             });
 
-            // Spawn Cards
+            // Spawn Cards with Touch Drag support
             const count = state.size === 'large' ? 6 : state.size === 'medium' ? 9 : 12;
             for (let i = 0; i < count; i++) {
                 const t = themes[Math.floor(Math.random() * themes.length)];
                 const card = document.createElement('div');
                 card.draggable = true;
                 card.dataset.type = t.type;
-                card.className = `drag-card w-14 h-14 rounded-xl bg-black/80 border-2 ${t.border} flex items-center justify-center text-xl text-white shadow-lg transform hover:scale-110 transition-all`;
+                card.className = `drag-card w-11 h-11 md:w-14 md:h-14 rounded-xl bg-black/80 border-2 ${t.border} flex items-center justify-center text-lg md:text-xl text-white shadow-lg transform hover:scale-110 transition-all flex-shrink-0`;
                 card.innerHTML = `<i class="fa-solid ${t.icon}"></i>`;
                 
+                // HTML5 Drag Events
                 card.addEventListener('dragstart', (e) => {
                     e.dataTransfer.setData('text/plain', t.type);
                     card.classList.add('opacity-40');
                 });
-
                 card.addEventListener('dragend', () => {
                     card.classList.remove('opacity-40');
+                });
+
+                // Touch Drag Handler
+                let touchGhost = null;
+                card.addEventListener('touchstart', (e) => {
+                    if (!state.isRunning) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    card.classList.add('opacity-40');
+
+                    touchGhost = card.cloneNode(true);
+                    touchGhost.style.position = 'fixed';
+                    touchGhost.style.pointerEvents = 'none';
+                    touchGhost.style.zIndex = '1000';
+                    touchGhost.style.left = (touch.clientX - 25) + 'px';
+                    touchGhost.style.top = (touch.clientY - 25) + 'px';
+                    document.body.appendChild(touchGhost);
+                }, { passive: false });
+
+                card.addEventListener('touchmove', (e) => {
+                    if (!touchGhost) return;
+                    e.preventDefault();
+                    const touch = e.touches[0];
+                    touchGhost.style.left = (touch.clientX - 25) + 'px';
+                    touchGhost.style.top = (touch.clientY - 25) + 'px';
+                }, { passive: false });
+
+                card.addEventListener('touchend', (e) => {
+                    if (!touchGhost) return;
+                    e.preventDefault();
+                    const touch = e.changedTouches[0];
+                    if (touchGhost) touchGhost.remove();
+                    card.classList.remove('opacity-40');
+
+                    // Check Drop Collision with Target Zones
+                    const dropTarget = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const zone = dropTarget ? dropTarget.closest('.drop-zone') : null;
+                    if (zone) {
+                        const targetType = zone.dataset.targetType;
+                        if (t.type === targetType) {
+                            state.score += 400;
+                            state.dragSuccessCount++;
+                            playSynthesizedSound('hit');
+                            card.remove();
+                        } else {
+                            state.misses++;
+                            state.score = Math.max(0, state.score - 150);
+                            playSynthesizedSound('miss');
+                        }
+                        updateHUD();
+                        if (document.querySelectorAll('.drag-card').length === 0) {
+                            initDragChallenge();
+                        }
+                    }
                 });
 
                 dragItemsContainer.appendChild(card);
@@ -1074,6 +948,205 @@
         function closeResultModal() {
             resultModal.classList.add('hidden');
             startOverlay.classList.remove('hidden');
+        }
+
+        // --- GAME LOOP & SESSION MANAGEMENT ---
+
+        function spawnClickTarget() {
+            const margin = 60;
+            const sizeMap = { large: 45, medium: 32, small: 22 };
+            const radius = sizeMap[state.size] || 32;
+
+            clickTarget.x = margin + Math.random() * (canvas.width - margin * 2);
+            clickTarget.y = margin + Math.random() * (canvas.height - margin * 2);
+            clickTarget.radius = radius;
+            clickTarget.outerRadius = radius * 1.5;
+            clickTarget.shrinking = true;
+            state.lastSpawnTime = Date.now();
+        }
+
+        function startSession() {
+            initAudio();
+            startOverlay.classList.add('hidden');
+
+            state.isRunning = true;
+            state.timeLeft = state.duration;
+            state.score = 0;
+            state.hits = 0;
+            state.criticals = 0;
+            state.misses = 0;
+            state.totalClicks = 0;
+            state.reactionTimes = [];
+            state.trackTotalFrames = 0;
+            state.trackHoverFrames = 0;
+            state.dragSuccessCount = 0;
+            particles = [];
+
+            if (state.mode === 'click') {
+                spawnClickTarget();
+            } else if (state.mode === 'track') {
+                trackOrb.x = canvas.width / 2;
+                trackOrb.y = canvas.height / 2;
+                trackOrb.t = 0;
+                const speedMap = { slow: 0.003, medium: 0.006, fast: 0.012 };
+                trackOrb.speed = speedMap[state.speed] || 0.006;
+            } else if (state.mode === 'drag') {
+                initDragChallenge();
+            }
+
+            updateHUD();
+
+            clearInterval(state.timerId);
+            state.timerId = setInterval(() => {
+                state.timeLeft -= 0.1;
+                if (state.timeLeft <= 0) {
+                    state.timeLeft = 0;
+                    stopSession();
+                } else {
+                    document.getElementById('hud-timer').textContent = state.timeLeft.toFixed(1) + 's';
+                }
+            }, 100);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function stopSession() {
+            state.isRunning = false;
+            clearInterval(state.timerId);
+            showAnalyticsReport();
+        }
+
+        function updateTrackingOrb() {
+            trackOrb.t += trackOrb.speed;
+            const w = canvas.width;
+            const h = canvas.height;
+            const cx = w / 2;
+            const cy = h / 2;
+            const rx = (w / 2) - 80;
+            const ry = (h / 2) - 80;
+
+            // Smooth Lissajous curve movement path
+            trackOrb.x = cx + Math.sin(trackOrb.t * 2) * rx * Math.cos(trackOrb.t * 0.5);
+            trackOrb.y = cy + Math.sin(trackOrb.t * 3) * ry;
+
+            const dist = Math.hypot(mousePos.x - trackOrb.x, mousePos.y - trackOrb.y);
+            trackOrb.isHovered = dist <= trackOrb.radius;
+
+            state.trackTotalFrames++;
+            if (trackOrb.isHovered) {
+                state.trackHoverFrames++;
+                state.score += 10;
+                if (state.trackHoverFrames % 5 === 0) playSynthesizedSound('hit');
+            }
+            updateHUD();
+        }
+
+        function drawCrosshair() {
+            if (mousePos.x < 0 || mousePos.y < 0) return;
+
+            ctx.save();
+            ctx.strokeStyle = '#00f0ff';
+            ctx.fillStyle = '#00f0ff';
+            ctx.lineWidth = 1.5;
+
+            if (state.crosshair === 'dot') {
+                ctx.beginPath();
+                ctx.arc(mousePos.x, mousePos.y, 4, 0, Math.PI * 2);
+                ctx.fill();
+            } else if (state.crosshair === 'cross') {
+                const len = 8;
+                const gap = 3;
+                ctx.beginPath();
+                ctx.moveTo(mousePos.x - len - gap, mousePos.y);
+                ctx.lineTo(mousePos.x - gap, mousePos.y);
+                ctx.moveTo(mousePos.x + gap, mousePos.y);
+                ctx.lineTo(mousePos.x + len + gap, mousePos.y);
+                ctx.moveTo(mousePos.x, mousePos.y - len - gap);
+                ctx.lineTo(mousePos.x, mousePos.y - gap);
+                ctx.moveTo(mousePos.x, mousePos.y + gap);
+                ctx.lineTo(mousePos.x, mousePos.y + len + gap);
+                ctx.stroke();
+            } else if (state.crosshair === 'circle') {
+                ctx.beginPath();
+                ctx.arc(mousePos.x, mousePos.y, 10, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.arc(mousePos.x, mousePos.y, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function gameLoop() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            if (state.isRunning) {
+                if (state.mode === 'click') {
+                    // Outer pulsating animation ring
+                    if (clickTarget.shrinking) {
+                        clickTarget.outerRadius -= 0.4;
+                        if (clickTarget.outerRadius <= clickTarget.radius) clickTarget.shrinking = false;
+                    } else {
+                        clickTarget.outerRadius += 0.4;
+                        if (clickTarget.outerRadius >= clickTarget.radius * 1.4) clickTarget.shrinking = true;
+                    }
+
+                    // Draw Target Body
+                    ctx.save();
+                    ctx.shadowColor = '#00f0ff';
+                    ctx.shadowBlur = 15;
+                    ctx.fillStyle = 'rgba(0, 240, 255, 0.2)';
+                    ctx.strokeStyle = '#00f0ff';
+                    ctx.lineWidth = 2;
+
+                    ctx.beginPath();
+                    ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Dynamic Outer Ring
+                    ctx.strokeStyle = 'rgba(0, 240, 255, 0.5)';
+                    ctx.beginPath();
+                    ctx.arc(clickTarget.x, clickTarget.y, clickTarget.outerRadius, 0, Math.PI * 2);
+                    ctx.stroke();
+
+                    // Headshot Critical Center Point
+                    ctx.shadowColor = '#ff0055';
+                    ctx.fillStyle = '#ff0055';
+                    ctx.beginPath();
+                    ctx.arc(clickTarget.x, clickTarget.y, clickTarget.radius * 0.35, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+
+                } else if (state.mode === 'track') {
+                    updateTrackingOrb();
+
+                    // Draw Tracking Orb
+                    ctx.save();
+                    ctx.shadowColor = trackOrb.isHovered ? '#00ff66' : '#ff0055';
+                    ctx.shadowBlur = trackOrb.isHovered ? 25 : 10;
+                    ctx.fillStyle = trackOrb.isHovered ? 'rgba(0, 255, 102, 0.3)' : 'rgba(255, 0, 85, 0.2)';
+                    ctx.strokeStyle = trackOrb.isHovered ? '#00ff66' : '#ff0055';
+                    ctx.lineWidth = 3;
+
+                    ctx.beginPath();
+                    ctx.arc(trackOrb.x, trackOrb.y, trackOrb.radius, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+
+                    // Center Core Dot
+                    ctx.fillStyle = trackOrb.isHovered ? '#00ff66' : '#ff0055';
+                    ctx.beginPath();
+                    ctx.arc(trackOrb.x, trackOrb.y, 6, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.restore();
+                }
+
+                updateAndRenderParticles();
+                drawCrosshair();
+
+                requestAnimationFrame(gameLoop);
+            }
         }
     </script>
 </body>
